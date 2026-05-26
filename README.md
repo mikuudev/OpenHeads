@@ -13,7 +13,7 @@ A modern, free party guessing game built with Next.js, Supabase, and TypeScript.
 ### 1. Clone & Install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/mikuudev/OpenHeads
 cd openheads
 npm install
 ```
