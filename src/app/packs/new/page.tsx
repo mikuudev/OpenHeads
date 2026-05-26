@@ -109,7 +109,15 @@ export default function CreatePackPage() {
 
     setSaving(true);
 
-    const packId = crypto.randomUUID();
+    function uuid() {
+      if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+      });
+    }
+
+    const packId = uuid();
 
     const packData = {
       id: packId,
@@ -120,7 +128,7 @@ export default function CreatePackPage() {
       cover_url: coverUrl.trim() || null,
       tags,
       visibility,
-      author_id: user?.id || "anonymous",
+      author_id: user?.id || uuid(),
       language: "en",
       cards_count: validCards.length,
     };
@@ -128,7 +136,8 @@ export default function CreatePackPage() {
     const { error: packError } = await supabase.from("packs").insert(packData);
 
     if (packError) {
-      toast.error("Failed to create pack");
+      console.error("Pack insert error:", packError);
+      toast.error(packError.message || "Failed to create pack");
       setSaving(false);
       return;
     }

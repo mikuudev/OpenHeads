@@ -61,9 +61,9 @@ CREATE POLICY "Anyone can read public packs"
   ON packs FOR SELECT
   USING (visibility = 'public' OR visibility = 'unlisted' OR author_id = auth.uid());
 
-CREATE POLICY "Users can create packs"
+CREATE POLICY "Anyone can create packs"
   ON packs FOR INSERT
-  WITH CHECK (auth.uid() = author_id OR author_id IN (SELECT id FROM users WHERE is_guest = true));
+  WITH CHECK (true);
 
 CREATE POLICY "Authors can update own packs"
   ON packs FOR UPDATE
@@ -101,10 +101,10 @@ CREATE POLICY "Cards readable with pack"
     )
   );
 
-CREATE POLICY "Authors can manage cards"
+CREATE POLICY "Anyone can add cards to their pack"
   ON cards FOR INSERT
   WITH CHECK (
-    EXISTS (SELECT 1 FROM packs WHERE packs.id = cards.pack_id AND packs.author_id = auth.uid())
+    EXISTS (SELECT 1 FROM packs WHERE packs.id = cards.pack_id)
   );
 
 CREATE POLICY "Authors can update cards"
