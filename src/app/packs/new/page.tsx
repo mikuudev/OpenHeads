@@ -109,7 +109,8 @@ export default function CreatePackPage() {
 
     setSaving(true);
 
-    function uuid() {
+    try {
+      function uuid() {
       if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
       return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
         const r = (Math.random() * 16) | 0;
@@ -157,13 +158,19 @@ export default function CreatePackPage() {
     const { error: cardsError } = await supabase.from("cards").insert(cardInserts);
 
     if (cardsError) {
-      toast.error("Failed to save cards");
+      console.error("Cards insert error:", cardsError);
+      toast.error(cardsError.message || "Failed to save cards");
       setSaving(false);
       return;
     }
 
     toast.success("Pack created!");
     router.push(`/packs/${packId}`);
+    } catch (e: any) {
+      console.error("Save error:", e);
+      toast.error(e?.message || "Something went wrong");
+      setSaving(false);
+    }
   };
 
   return (
