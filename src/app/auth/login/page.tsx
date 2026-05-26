@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/store";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Sparkles } from "lucide-react";
@@ -13,9 +14,16 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/discovery");
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +41,7 @@ export default function LoginPage() {
     }
 
     toast.success("Welcome back!");
-    router.push("/");
+    router.push("/discovery");
   };
 
   const handleGoogleLogin = async () => {
@@ -58,10 +66,27 @@ export default function LoginPage() {
       created_at: new Date().toISOString(),
     };
     localStorage.setItem("openheads_guest", JSON.stringify(guestUser));
+    document.cookie = `openheads_guest=true; path=/; max-age=86400; SameSite=Lax`;
     useAuthStore.getState().setUser(guestUser as any);
     toast.success("Playing as guest");
-    router.push("/");
+    router.push("/discovery");
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-dvh flex items-center justify-center bg-zinc-950">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 animate-pulse" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return (
+      <div className="h-dvh flex items-center justify-center bg-zinc-950">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 animate-pulse" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh flex flex-col p-4">

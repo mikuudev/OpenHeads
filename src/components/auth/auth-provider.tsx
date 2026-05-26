@@ -10,6 +10,7 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isGuest: boolean;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   isLoading: true,
   isAuthenticated: false,
+  isGuest: false,
   signOut: async () => {},
   refreshUser: async () => {},
 });
@@ -39,6 +41,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data as User | null;
   };
 
+  const syncGuestCookie = () => {
+    const guestData = localStorage.getItem("openheads_guest");
+    if (guestData) {
+      document.cookie = `openheads_guest=true; path=/; max-age=86400; SameSite=Lax`;
+    } else {
+      document.cookie = `openheads_guest=; path=/; max-age=0; SameSite=Lax`;
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -47,16 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.session?.user) {
         const profile = await fetchProfile(data.session.user.id);
         setUser(profile);
+        syncGuestCookie();
       } else {
         const guestData = localStorage.getItem("openheads_guest");
         if (guestData) {
           try {
             setUser(JSON.parse(guestData));
+            document.cookie = `openheads_guest=true; path=/; max-age=86400; SameSite=Lax`;
           } catch {
             setUser(null);
+            document.cookie = `openheads_guest=; path=/; max-age=0; SameSite=Lax`;
           }
         } else {
           setUser(null);
+          document.cookie = `openheads_guest=; path=/; max-age=0; SameSite=Lax`;
         }
       }
       setInitialized(true);
@@ -67,14 +82,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } =     supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setUser(profile);
-      } else {
-        setUser(null);
+    } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          setUser(profile);
+          syncGuestCookie();
+        } else {
+          setUser(null);
+        }
       }
-    });
+    );
 
     return () => subscription.unsubscribe();
   }, [setUser, setLoading]);
@@ -82,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("openheads_guest");
+    document.cookie = `openheads_guest=; path=/; max-age=0; SameSite=Lax`;
     setUser(null);
   };
 
@@ -98,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading: isLoading || !initialized,
         isAuthenticated: !!user && !user.is_guest,
+        isGuest: !!user?.is_guest,
         signOut,
         refreshUser,
       }}

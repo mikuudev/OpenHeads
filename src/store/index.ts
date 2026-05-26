@@ -27,8 +27,6 @@ interface GameState {
   duration: number;
   round: Round | null;
   isPaused: boolean;
-  isCalibrating: boolean;
-  calibrationThreshold: number;
   setPlaying: (playing: boolean) => void;
   setSession: (session: GameSession | null) => void;
   setCurrentCard: (card: Card | null) => void;
@@ -39,8 +37,6 @@ interface GameState {
   setTimeLeft: (time: number) => void;
   setDuration: (duration: number) => void;
   setPaused: (paused: boolean) => void;
-  setCalibrating: (calibrating: boolean) => void;
-  setCalibrationThreshold: (threshold: number) => void;
   reset: () => void;
 }
 
@@ -56,8 +52,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   duration: 60,
   round: null,
   isPaused: false,
-  isCalibrating: false,
-  calibrationThreshold: 30,
   setPlaying: (isPlaying) => set({ isPlaying }),
   setSession: (session) => set({ session }),
   setCurrentCard: (currentCard) => set({ currentCard }),
@@ -92,9 +86,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   setTimeLeft: (timeLeft) => set({ timeLeft }),
   setDuration: (duration) => set({ duration }),
   setPaused: (isPaused) => set({ isPaused }),
-  setCalibrating: (isCalibrating) => set({ isCalibrating }),
-  setCalibrationThreshold: (calibrationThreshold) =>
-    set({ calibrationThreshold }),
   reset: () =>
     set({
       isPlaying: false,

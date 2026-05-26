@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s | OpenHeads",
   },
   description:
-    "A modern, free party guessing game. Act out words, tilt to score, and have fun with friends.",
+    "A modern, free party guessing game. Act out words, tap to score, and have fun with friends.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "OpenHeads - Party Guessing Game",
     description:
-      "A modern, free party guessing game. Act out words, tilt to score, and have fun with friends.",
+      "A modern, free party guessing game. Act out words, tap to score, and have fun with friends.",
     type: "website",
     siteName: "OpenHeads",
   },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "OpenHeads - Party Guessing Game",
     description:
-      "A modern, free party guessing game. Act out words, tilt to score, and have fun with friends.",
+      "A modern, free party guessing game. Act out words, tap to score, and have fun with friends.",
   },
 };
 

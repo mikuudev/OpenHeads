@@ -1,9 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, Gamepad2, Users, Globe, Zap } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
+import {
+  ArrowRight,
+  Sparkles,
+  Gamepad2,
+  Users,
+  Globe,
+  Zap,
+} from "lucide-react";
 
 const features = [
   {
@@ -14,7 +24,7 @@ const features = [
   {
     icon: Users,
     title: "Play with Friends",
-    desc: "One holds the phone, others guess. Tilt down for correct, up to skip.",
+    desc: "One holds the phone, others guess. Tap right for correct, left to skip.",
   },
   {
     icon: Globe,
@@ -29,13 +39,46 @@ const features = [
 ];
 
 const howItWorks = [
-  { step: "1", title: "Pick a Pack", desc: "Choose from thousands of community packs or create your own." },
-  { step: "2", title: "Hold the Phone", desc: "Hold your phone to your forehead. The screen shows a word or phrase." },
-  { step: "3", title: "Get Clues", desc: "Your friends act out, describe, or give clues for you to guess." },
-  { step: "4", title: "Tilt to Score", desc: "Tilt the phone down when you guess correctly, up to skip." },
+  {
+    step: "1",
+    title: "Pick a Pack",
+    desc: "Choose from thousands of community packs or create your own.",
+  },
+  {
+    step: "2",
+    title: "Hold the Phone",
+    desc: "Hold your phone to your forehead. The screen shows a word or phrase.",
+  },
+  {
+    step: "3",
+    title: "Get Clues",
+    desc: "Your friends act out, describe, or give clues for you to guess.",
+  },
+  {
+    step: "4",
+    title: "Tap to Score",
+    desc: "Tap right when you guess correctly, left to skip.",
+  },
 ];
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/discovery");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  if (isLoading || isAuthenticated) {
+    return (
+      <div className="h-dvh flex items-center justify-center bg-zinc-950">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 animate-pulse" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-dvh">
       <header className="sticky top-0 z-50 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl">
@@ -48,10 +91,14 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link href="/auth/login">
-              <Button variant="ghost" size="sm">Log In</Button>
+              <Button variant="ghost" size="sm">
+                Log In
+              </Button>
             </Link>
             <Link href="/auth/register">
-              <Button variant="primary" size="sm">Sign Up</Button>
+              <Button variant="primary" size="sm">
+                Sign Up
+              </Button>
             </Link>
           </div>
         </div>
@@ -78,16 +125,25 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-xl mx-auto leading-relaxed">
-              The classic heads-up guessing game, completely free. Act it out, tilt to score, party on.
+              The classic heads-up guessing game, completely free. Act it out,
+              tap to score, party on.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link href="/auth/register">
-                <Button variant="primary" size="xl" className="w-full sm:w-auto text-base gap-2">
+                <Button
+                  variant="primary"
+                  size="xl"
+                  className="w-full sm:w-auto text-base gap-2"
+                >
                   Get Started Free <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/discovery">
-                <Button variant="outline" size="xl" className="w-full sm:w-auto text-base">
+                <Button
+                  variant="outline"
+                  size="xl"
+                  className="w-full sm:w-auto text-base"
+                >
                   Browse Packs
                 </Button>
               </Link>
@@ -124,8 +180,12 @@ export default function LandingPage() {
                 <div className="h-10 w-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-4">
                   <feature.icon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{feature.desc}</p>
+                <h3 className="font-semibold text-lg mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {feature.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -161,7 +221,9 @@ export default function LandingPage() {
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.desc}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                  {item.desc}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -180,19 +242,27 @@ export default function LandingPage() {
               Built by the Community
             </h2>
             <p className="text-lg text-zinc-500 dark:text-zinc-400 mb-8">
-              Browse thousands of packs created by players worldwide, or create your own and share it with everyone.
+              Browse thousands of packs created by players worldwide, or create
+              your own and share it with everyone.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {["Funny", "Movies", "Animals", "Food", "Music", "Sports", "Celebrities", "Custom"].map(
-                (cat) => (
-                  <span
-                    key={cat}
-                    className="px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300"
-                  >
-                    {cat}
-                  </span>
-                )
-              )}
+              {[
+                "Funny",
+                "Movies",
+                "Animals",
+                "Food",
+                "Music",
+                "Sports",
+                "Celebrities",
+                "Custom",
+              ].map((cat) => (
+                <span
+                  key={cat}
+                  className="px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                >
+                  {cat}
+                </span>
+              ))}
             </div>
           </motion.div>
         </div>
@@ -209,7 +279,8 @@ export default function LandingPage() {
               Ready to Play?
             </h2>
             <p className="text-lg text-zinc-500 dark:text-zinc-400 mb-8">
-              Join thousands of players. It&apos;s free, it&apos;s fun, it&apos;s OpenHeads.
+              Join thousands of players. It&apos;s free, it&apos;s fun, it&apos;s
+              OpenHeads.
             </p>
             <Link href="/auth/register">
               <Button variant="primary" size="xl" className="text-base gap-2">

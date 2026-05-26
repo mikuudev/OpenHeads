@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
         return;
       }
       if (data.session) {
-        router.replace("/");
+        router.replace("/discovery");
       } else {
         const hashParams = new URLSearchParams(
           window.location.hash.substring(1)
@@ -28,7 +28,7 @@ export default function AuthCallbackPage() {
             refresh_token: hashParams.get("refresh_token") || "",
           });
           if (!sessionError) {
-            router.replace("/");
+            router.replace("/discovery");
             return;
           }
         }
