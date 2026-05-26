@@ -110,62 +110,59 @@ export default function CreatePackPage() {
     setSaving(true);
 
     try {
-      function uuid() {
-      if (typeof crypto?.randomUUID === "function") return crypto.randomUUID();
-      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-        const r = (Math.random() * 16) | 0;
-        return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
-      });
-    }
+      const id = typeof crypto?.randomUUID === "function"
+        ? crypto.randomUUID()
+        : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+            const r = (Math.random() * 16) | 0;
+            return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+          });
 
-    const packId = uuid();
+      const packData = {
+        id,
+        title: title.trim(),
+        description: description.trim() || null,
+        category: category.trim() || null,
+        difficulty,
+        cover_url: coverUrl.trim() || null,
+        tags,
+        visibility,
+        author_id: user?.id || id,
+        language: "en",
+        cards_count: validCards.length,
+      };
 
-    const packData = {
-      id: packId,
-      title: title.trim(),
-      description: description.trim() || null,
-      category: category.trim() || null,
-      difficulty,
-      cover_url: coverUrl.trim() || null,
-      tags,
-      visibility,
-      author_id: user?.id || uuid(),
-      language: "en",
-      cards_count: validCards.length,
-    };
+      const { error: packError } = await supabase.from("packs").insert(packData);
 
-    const { error: packError } = await supabase.from("packs").insert(packData);
+      if (packError) {
+        console.error("Pack insert error:", packError);
+        toast.error(packError.message || "Failed to create pack");
+        setSaving(false);
+        return;
+      }
 
-    if (packError) {
-      console.error("Pack insert error:", packError);
-      toast.error(packError.message || "Failed to create pack");
-      setSaving(false);
-      return;
-    }
+      const cardInserts = validCards.map((card, i) => ({
+        pack_id: id,
+        text: card.text.trim(),
+        image_url: card.image_url.trim() || null,
+        gif_url: card.gif_url.trim() || null,
+        aliases: card.aliases
+          .split(",")
+          .map((a) => a.trim())
+          .filter(Boolean),
+        order: i,
+      }));
 
-    const cardInserts = validCards.map((card, i) => ({
-      pack_id: packId,
-      text: card.text.trim(),
-      image_url: card.image_url.trim() || null,
-      gif_url: card.gif_url.trim() || null,
-      aliases: card.aliases
-        .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean),
-      order: i,
-    }));
+      const { error: cardsError } = await supabase.from("cards").insert(cardInserts);
 
-    const { error: cardsError } = await supabase.from("cards").insert(cardInserts);
+      if (cardsError) {
+        console.error("Cards insert error:", cardsError);
+        toast.error(cardsError.message || "Failed to save cards");
+        setSaving(false);
+        return;
+      }
 
-    if (cardsError) {
-      console.error("Cards insert error:", cardsError);
-      toast.error(cardsError.message || "Failed to save cards");
-      setSaving(false);
-      return;
-    }
-
-    toast.success("Pack created!");
-    router.push(`/packs/${packId}`);
+      toast.success("Pack created!");
+      router.push(`/packs/${id}`);
     } catch (e: any) {
       console.error("Save error:", e);
       toast.error(e?.message || "Something went wrong");
